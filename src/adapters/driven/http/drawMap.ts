@@ -1,6 +1,8 @@
 import { CONFIG } from "../../../config";
+import { CellInstruction, CellInterface } from "../../../models/Cell";
 import { HttpClient } from "../../../shared/httpClient";
-import { CellType, InputMap, Instruction, Result } from "../../../shared/types";
+import { CellType, Result } from "../../../shared/types";
+
 import { HttpRequestHandler } from "./handler";
 
 export class DrawMapHandler extends HttpRequestHandler {
@@ -8,28 +10,23 @@ export class DrawMapHandler extends HttpRequestHandler {
     super(httpClient);
   }
 
-  public async drawMap(instuctions: Array<Instruction>): Promise<Result<Array<Instruction>>> {
+  public async drawMap(instuctions: Array<CellInterface>): Promise<Result<Array<CellInstruction>>> {
     // const promises: { [key: string]: Promise<any> } = {};
-    const instructionMap: { [key: string]: Instruction } = {};
-    const results: {      [key: string]: any } = [];
-    const failedInstructions: Array<Instruction> = [];
-    
-    for (const instruction of instuctions) {
-      const { type, row, column } = instruction;
-      const path = this.getPath(type);
+    const instructionMap: { [key: string]: CellInterface } = {};
+    const failedInstructions: Array<CellInstruction> = [];
+
+    for (const cell of instuctions) {
+      const path = this.getPath(cell.getType());
       const url = `${this.baseURL}/${path}`;
-      const payload = {
-        candidateId: CONFIG.CANDIDATE_ID,
-        row,
-        column
-      };
-      const key = `${row},${column},${type}`;
-      instructionMap[key] = instruction;
-      
+      const payload = cell.toPayload();
+      const key = cell.toKey();
+      instructionMap[key] = cell;
+
       const result = await this.makeRequest(url, 'POST', payload);
 
       if (!result.success) {
-        failedInstructions.push(instruction);
+        const { candidateId: _, ...payloadWithoutCandidateId } = payload;
+        failedInstructions.push(payloadWithoutCandidateId);
         console.error(`Inside DrawMapHandler::drawMap error for key ${key} and error ${result.error?.message}`);
       }
     }

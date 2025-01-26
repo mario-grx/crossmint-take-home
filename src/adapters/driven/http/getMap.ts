@@ -1,6 +1,7 @@
 import { CONFIG } from "../../../config";
 import { HttpClient } from "../../../shared/httpClient";
 import { InputMap } from "../../../shared/types";
+
 import { HttpRequestHandler } from "./handler";
 
 export interface GetMapHandlerInterface {

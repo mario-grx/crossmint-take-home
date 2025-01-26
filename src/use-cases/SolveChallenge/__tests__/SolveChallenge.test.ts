@@ -1,8 +1,9 @@
-import { SolveChallenge } from '../SolveChallenge';
-import { GetMapHandler } from '../../../adapters/driven/http/getMap';
 import { DrawMapHandler } from '../../../adapters/driven/http/drawMap';
-import { CellType, Instruction } from '../../../shared/types';
+import { GetMapHandler } from '../../../adapters/driven/http/getMap';
+import { CellPolyanet } from '../../../models/Cell';
 import { HttpClient } from '../../../shared/httpClient';
+import { CellType } from '../../../shared/types';
+import { SolveChallenge } from '../SolveChallenge';
 
 jest.mock('../../../adapters/driven/http/getMap');
 jest.mock('../../../adapters/driven/http/drawMap');
@@ -20,12 +21,12 @@ describe('SolveChallenge', () => {
 
     getMapHandlerMock = new GetMapHandler(httpClientMock) as jest.Mocked<GetMapHandler>;
     getMapHandlerMock.getMap = jest.fn().mockResolvedValue({
-      
+
       goal: [
         [CellType.POLYANET, CellType.POLYANET, CellType.SPACE],
         [CellType.SPACE, CellType.SPACE, CellType.POLYANET]
       ]
-    
+
     });
 
     drawMapHandlerMock = new DrawMapHandler(httpClientMock) as jest.Mocked<DrawMapHandler>;
@@ -39,9 +40,9 @@ describe('SolveChallenge', () => {
 
     expect(getMapHandlerMock.getMap).toHaveBeenCalledTimes(1);
     expect(drawMapHandlerMock.drawMap).toHaveBeenCalledWith([
-      { row: 0, column: 0, type: CellType.POLYANET },
-      { row: 0, column: 1, type: CellType.POLYANET },
-      { row: 1, column: 2, type: CellType.POLYANET },
+      new CellPolyanet(0, 0),
+      new CellPolyanet(0, 1),
+      new CellPolyanet(1, 2),
     ]);
   });
 

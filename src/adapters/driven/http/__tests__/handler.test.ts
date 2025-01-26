@@ -1,7 +1,7 @@
-import { HttpRequestHandler } from '../handler';
+import { sleepAsync } from '../../../../shared/helper';
 import { HttpClient } from '../../../../shared/httpClient';
 import { Result } from '../../../../shared/types';
-import { sleepAsync } from '../../../../shared/helper';
+import { HttpRequestHandler } from '../handler';
 
 jest.mock('../../../../shared/httpClient');
 jest.mock('../../../../shared/helper', () => ({

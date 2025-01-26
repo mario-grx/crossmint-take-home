@@ -1,7 +1,7 @@
-import { GetMapHandler } from '../getMap';
-import { HttpClient } from '../../../../shared/httpClient';
-import { Result, InputMap } from '../../../../shared/types';
 import { CONFIG } from '../../../../config';
+import { HttpClient } from '../../../../shared/httpClient';
+import { InputMap, Result } from '../../../../shared/types';
+import { GetMapHandler } from '../getMap';
 
 jest.mock('../../../../shared/httpClient');
 

@@ -1,7 +1,7 @@
-import { DrawMapHandler } from '../drawMap';
+import { CellCometh, CellInterface, CellPolyanet, CellSoloon } from '../../../../models/Cell';
 import { HttpClient } from '../../../../shared/httpClient';
-import { CellType, Instruction, Result } from '../../../../shared/types';
-import { CONFIG } from '../../../../config';
+import { Result } from '../../../../shared/types';
+import { DrawMapHandler } from '../drawMap';
 
 jest.mock('../../../../shared/httpClient');
 
@@ -18,9 +18,11 @@ describe('DrawMapHandler', () => {
   });
 
   it('should draw the map successfully', async () => {
-    const instructions: Array<Instruction> = [
-      { type: CellType.POLYANET, row: 100, column: 100 },
-      { type: CellType.POLYANET, row: 101, column: 101 }
+    const instructions = [
+      new CellPolyanet(100, 100),
+      new CellPolyanet(101, 101),
+      new CellSoloon(102, 102, "PURPLE"),
+      new CellCometh(103, 103, "RIGHT")
     ];
 
     const mockSuccessResult: Result<any> = {
@@ -31,25 +33,24 @@ describe('DrawMapHandler', () => {
 
     (drawMapHandler.makeRequest as jest.Mock).mockResolvedValue(mockSuccessResult);
 
-    const result = await drawMapHandler.drawMap(instructions);
+    const result = await drawMapHandler.drawMap(instructions as any);
 
     expect(drawMapHandler.makeRequest).toHaveBeenCalledTimes(instructions.length);
     instructions.forEach(instruction => {
-      const { row, column, type } = instruction;
-      const path = (drawMapHandler as any).getPath(type);
+      const path = (drawMapHandler as any).getPath(instruction.getType());
       const url = `${TEST_BASE_URL}/${path}`;
-      const payload = { candidateId: CONFIG.CANDIDATE_ID, row, column };
+      const payload = instruction.toPayload();
       expect(drawMapHandler.makeRequest).toHaveBeenCalledWith(url, 'POST', payload);
     });
     expect(result).toEqual({ success: true, data: null });
   });
 
   it('should handle failed instructions', async () => {
-    const instructions: Array<Instruction> = [
-      { type: CellType.POLYANET, row: 0, column: 0 },
-      { type: CellType.POLYANET, row: 1, column: 1 },
-      { type: CellType.POLYANET, row: 2, column: 2 },
-      { type: CellType.POLYANET, row: 3, column: 3 }
+    const instructions = [
+      new CellPolyanet(0, 0),
+      new CellPolyanet(1, 1),
+      new CellPolyanet(2, 2),
+      new CellPolyanet(3, 3)
     ];
 
     const mockFailureResult: Result<any> = {
@@ -64,14 +65,13 @@ describe('DrawMapHandler', () => {
       .mockResolvedValueOnce(mockFailureResult)
       .mockResolvedValueOnce(mockFailureResult);
 
-    const result = await drawMapHandler.drawMap(instructions);
+    const result = await drawMapHandler.drawMap(instructions as CellInterface[]);
 
     expect(drawMapHandler.makeRequest).toHaveBeenCalledTimes(instructions.length);
     instructions.forEach(instruction => {
-      const { row, column, type } = instruction;
-      const path = (drawMapHandler as any).getPath(type);
+      const path = (drawMapHandler as any).getPath(instruction.getType());
       const url = `${TEST_BASE_URL}/${path}`;
-      const payload = { candidateId: CONFIG.CANDIDATE_ID, row, column };
+      const payload = instruction.toPayload();
       expect(drawMapHandler.makeRequest).toHaveBeenCalledWith(url, 'POST', payload);
     });
     expect(result).toEqual({ success: false, data: instructions });
